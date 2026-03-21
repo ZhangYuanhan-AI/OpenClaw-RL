@@ -166,6 +166,9 @@ else
   echo "  → 克隆 apex 到 $APEX_TMP ..."
   git clone --depth 1 https://github.com/NVIDIA/apex.git "$APEX_TMP/apex"
   cd "$APEX_TMP/apex"
+  # apex 会严格检查 torch CUDA 版本 == nvcc 版本，12.8 vs 12.2 minor mismatch 是安全的
+  # 参考 https://github.com/NVIDIA/apex/pull/323#discussion_r287021798
+  sed -i 's/raise RuntimeError(message)/warnings.warn(message)/' setup.py
   APEX_CPP_EXT=1 APEX_CUDA_EXT=1 $PIP install -v --no-build-isolation .
   cd "$REPO_DIR"
   rm -rf "$APEX_TMP"

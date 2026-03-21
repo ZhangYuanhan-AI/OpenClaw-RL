@@ -14,6 +14,18 @@ export UV_LINK_MODE=copy
 export CUDA_HOME="${CUDA_HOME:-/usr/local/cuda-12.2}"
 export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}"
 
+# PyTorch C++ extensions 需要 GCC 9+，计算节点默认 GCC 太旧则自动启用 gcc-toolset
+if ! gcc -dumpversion 2>/dev/null | awk -F. '{exit ($1 >= 9 ? 1 : 0)}'; then
+  for _ts in 13 12 11; do
+    _enable="/opt/rh/gcc-toolset-${_ts}/enable"
+    if [ -f "$_enable" ]; then
+      echo "  ⚠ 系统 GCC < 9，启用 gcc-toolset-${_ts}"
+      source "$_enable"
+      break
+    fi
+  done
+fi
+
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=============================="

@@ -56,11 +56,11 @@ echo "[1/6] 检查 PyTorch..."
 if python -c "import torch; print(f'  ✓ PyTorch {torch.__version__} (CUDA {torch.version.cuda}) 已可用，跳过')" 2>/dev/null; then
   :
 else
-  echo "  → 系统也没有 PyTorch，正在安装 torch==2.9.1+cu121..."
+  echo "  → 系统也没有 PyTorch，正在安装 torch==2.4.1+cu121..."
   $PIP install \
-    torch==2.9.1+cu121 \
-    torchvision==0.24.1+cu121 \
-    torchaudio==2.9.1+cu121 \
+    torch==2.4.1+cu121 \
+    torchvision==0.19.1+cu121 \
+    torchaudio==2.4.1+cu121 \
     --index-url https://download.pytorch.org/whl/cu121
   echo "  ✓ PyTorch 安装完成"
 fi

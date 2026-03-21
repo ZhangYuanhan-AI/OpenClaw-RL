@@ -10,6 +10,10 @@ set -euo pipefail
 # 直接用 copy 模式，避免每个包都打一次 warning
 export UV_LINK_MODE=copy
 
+# CUDA 12.2 适配
+export CUDA_HOME="${CUDA_HOME:-/usr/local/cuda-12.2}"
+export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-9.0}"
+
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=============================="
@@ -52,12 +56,12 @@ echo "[1/6] 检查 PyTorch..."
 if python -c "import torch; print(f'  ✓ PyTorch {torch.__version__} (CUDA {torch.version.cuda}) 已可用，跳过')" 2>/dev/null; then
   :
 else
-  echo "  → 系统也没有 PyTorch，正在安装 torch==2.9.1+cu129..."
+  echo "  → 系统也没有 PyTorch，正在安装 torch==2.9.1+cu121..."
   $PIP install \
-    torch==2.9.1+cu129 \
-    torchvision==0.24.1+cu129 \
-    torchaudio==2.9.1+cu129 \
-    --index-url https://download.pytorch.org/whl/cu129
+    torch==2.9.1+cu121 \
+    torchvision==0.24.1+cu121 \
+    torchaudio==2.9.1+cu121 \
+    --index-url https://download.pytorch.org/whl/cu121
   echo "  ✓ PyTorch 安装完成"
 fi
 
@@ -162,7 +166,7 @@ else
 fi
 
 # flashinfer
-$PIP install "flashinfer-jit-cache==0.5.3" --index-url https://flashinfer.ai/whl/cu129
+$PIP install "flashinfer-jit-cache==0.5.3" --index-url https://flashinfer.ai/whl/cu121
 echo "  ✓ flashinfer-jit-cache"
 
 # --------------------------------------------------

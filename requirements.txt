@@ -116,7 +116,7 @@ mcp==1.26.0
 mdit-py-plugins==0.5.0
 mdurl==0.1.2
 megatron-bridge @ git+https://github.com/fzyzcjy/Megatron-Bridge.git@35b4ebfc486fb15dcc0273ceea804c3606be948a
--e git+https://github.com/NVIDIA/Megatron-LM.git@3714d81d418c9f1bca4594fc35f9e8289f652862#egg=megatron_core
+megatron_core @ git+https://github.com/NVIDIA/Megatron-LM.git@3714d81d418c9f1bca4594fc35f9e8289f652862
 memray==1.19.1
 ml_dtypes==0.5.4
 modelscope==1.33.0

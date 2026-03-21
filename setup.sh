@@ -166,7 +166,7 @@ else
   echo "  → 克隆 apex 到 $APEX_TMP ..."
   git clone --depth 1 https://github.com/NVIDIA/apex.git "$APEX_TMP/apex"
   cd "$APEX_TMP/apex"
-  APEX_CPP_EXT=1 APEX_CUDA_EXT=1 pip install -v --no-build-isolation .
+  APEX_CPP_EXT=1 APEX_CUDA_EXT=1 $PIP install -v --no-build-isolation .
   cd "$REPO_DIR"
   rm -rf "$APEX_TMP"
   echo "  ✓ apex 编译安装完成"
@@ -177,7 +177,7 @@ if python -c "import flash_attn" 2>/dev/null; then
   echo "  ✓ flash-attn 已安装，跳过"
 else
   echo "  → 编译安装 flash-attn==2.7.4.post1 (MAX_JOBS=8)..."
-  MAX_JOBS=8 pip install --no-build-isolation -v flash-attn==2.7.4.post1
+  MAX_JOBS=8 $PIP install --no-build-isolation -v flash-attn==2.7.4.post1
   echo "  ✓ flash-attn"
 fi
 

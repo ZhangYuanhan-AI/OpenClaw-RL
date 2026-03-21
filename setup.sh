@@ -152,9 +152,9 @@ if python -c "import transformer_engine" 2>/dev/null; then
 else
   echo "  → 安装 transformer_engine==2.10.0 (CUDA 编译，可能需要 20-60 分钟)..."
   # transformer_engine / _cu12 是纯 wheel，正常装
-  pip install transformer_engine==2.10.0 transformer_engine_cu12==2.10.0
+  $PIP install transformer_engine==2.10.0 transformer_engine_cu12==2.10.0
   # transformer_engine_torch 需要源码编译，必须 --no-build-isolation 使用当前 venv 的 torch
-  pip install transformer_engine_torch==2.10.0 --no-build-isolation
+  $PIP install transformer_engine_torch==2.10.0 --no-build-isolation
   echo "  ✓ transformer_engine"
 fi
 

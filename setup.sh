@@ -168,7 +168,14 @@ else
   cd "$APEX_TMP/apex"
   # apex 会严格检查 torch CUDA 版本 == nvcc 版本，12.8 vs 12.2 minor mismatch 是安全的
   # 参考 https://github.com/NVIDIA/apex/pull/323#discussion_r287021798
-  sed -i 's/raise RuntimeError(message)/warnings.warn(message)/' setup.py
+  # raise RuntimeError(...) 跨多行，sed 无法匹配，用 python 替换
+  python -c "
+import re, pathlib
+p = pathlib.Path('setup.py')
+src = p.read_text()
+src = re.sub(r'def check_cuda_torch_binary_vs_bare_metal.*?(?=\ndef )', 'def check_cuda_torch_binary_vs_bare_metal(cuda_dir):\n    import warnings; warnings.warn(\"Skipping CUDA version check\")\n\n', src, flags=re.DOTALL)
+p.write_text(src)
+"
   APEX_CPP_EXT=1 APEX_CUDA_EXT=1 $PIP install -v --no-build-isolation .
   cd "$REPO_DIR"
   rm -rf "$APEX_TMP"

@@ -192,7 +192,7 @@ else
 fi
 
 # flashinfer
-$PIP install "flashinfer-jit-cache==0.5.3" --index-url https://flashinfer.ai/whl/cu121
+$PIP install "flashinfer-jit-cache==0.5.3" --index-url https://flashinfer.ai/whl/cu128
 echo "  ✓ flashinfer-jit-cache"
 
 # --------------------------------------------------

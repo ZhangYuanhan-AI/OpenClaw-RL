@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ============================================================
 # OpenClaw-RL 一键安装脚本
-# 前提：uv 虚拟环境（激活状态），CUDA 12.9
+# 前提：uv 虚拟环境（激活状态），CUDA 12.2+ 驱动
 # 用法：bash setup.sh
 # ============================================================
 set -euo pipefail
@@ -49,7 +49,7 @@ command -v uv >/dev/null 2>&1 && echo "  ✓ uv $(uv --version 2>/dev/null)" \
 if command -v uv >/dev/null 2>&1; then
   PIP="uv pip"
 else
-  PIP="pip"
+  PIP="python -m pip"
 fi
 
 # 确保关闭 system-site-packages（避免系统包和 venv 包冲突，尤其 torch）
@@ -61,7 +61,9 @@ if [ -f "$PYVENV_CFG" ] && grep -q "include-system-site-packages = true" "$PYVEN
 fi
 
 # --------------------------------------------------
-# 1. 安装 PyTorch (CUDA 12.9) — 如系统已有则跳过
+# 1. 安装 PyTorch — 如系统已有则跳过
+#    注意: fallback 版本是 2.4.1+cu121，适用于没有预装 torch 的环境
+#    如果预装了 torch 2.9.1+cu128，后续 CUDA 编译步骤会自动适配
 # --------------------------------------------------
 echo ""
 echo "[1/6] 检查 PyTorch..."
@@ -86,7 +88,7 @@ echo ""
 echo "[2/6] 安装 Python 依赖 (requirements.txt)..."
 
 # 需排除的包（系统包装不了 / 已装 / 后面单独装 / 需 CUDA 编译）
-EXCLUDE_PATTERN='(^torch==|^torchvision==|^torchaudio==|^torchao==|^nvidia-|^git\+|.*@ git\+|^dbus-python|^PyGObject|^devscripts|^transformer_engine|^transformer_engine_cu12|^transformer_engine_torch)'
+EXCLUDE_PATTERN='(^torch==|^torchvision==|^torchaudio==|^torchao==|^nvidia-|^git\+|.*@ git\+|^dbus-python|^PyGObject|^devscripts|^transformer_engine|^transformer_engine_cu12|^transformer_engine_torch|^flash-attn|^flash_attn|^flashinfer)'
 
 grep -v -E "$EXCLUDE_PATTERN" "$REPO_DIR/requirements.txt" \
   > /tmp/openclaw-rl-filtered-requirements.txt
@@ -105,10 +107,6 @@ echo "[3/6] 安装 git+ 源码依赖..."
 # sglang (从 sgl-project fork)
 $PIP install "sglang @ git+https://github.com/sgl-project/sglang.git@dce8b0606c06d3a191a24c7b8cbe8e238ab316c9#subdirectory=python"
 echo "  ✓ sglang"
-
-# slime (THUDM 训练框架)
-$PIP install "slime @ git+https://github.com/THUDM/slime.git@58ee74898f72aacd2413ffdf7685dc0eee72d8d8"
-echo "  ✓ slime"
 
 # megatron_core
 $PIP install "megatron_core @ git+https://github.com/NVIDIA/Megatron-LM.git@3714d81d418c9f1bca4594fc35f9e8289f652862"
@@ -132,7 +130,7 @@ echo "  ✓ torch_memory_saver"
 echo ""
 echo "[4/6] 安装本地包 (editable)..."
 
-# 本地 slime（覆盖上面远程版本，用本地开发版）
+# 本地 slime（用本地开发版）
 $PIP install -e "$REPO_DIR/slime/"
 echo "  ✓ slime (local editable)"
 
@@ -191,9 +189,14 @@ else
   echo "  ✓ flash-attn"
 fi
 
-# flashinfer
-$PIP install "flashinfer-jit-cache==0.5.3" --index-url https://flashinfer.ai/whl/cu128
-echo "  ✓ flashinfer-jit-cache"
+# flashinfer — 索引需匹配 torch 的 CUDA 版本
+TORCH_CUDA_VER=$(python -c "import torch; v=torch.version.cuda; print(f'cu{v.split(\".\")[0]}{v.split(\".\")[1]}')" 2>/dev/null || echo "cu128")
+if python -c "import flashinfer_jit_cache" 2>/dev/null; then
+  echo "  ✓ flashinfer-jit-cache 已安装，跳过"
+else
+  $PIP install "flashinfer-jit-cache==0.5.3" --extra-index-url "https://flashinfer.ai/whl/${TORCH_CUDA_VER}"
+  echo "  ✓ flashinfer-jit-cache"
+fi
 
 # --------------------------------------------------
 # 6. 验证安装

@@ -88,9 +88,10 @@ echo ""
 echo "[2/6] 安装 Python 依赖 (requirements.txt)..."
 
 # 需排除的包（系统包装不了 / 已装 / 后面单独装 / 需 CUDA 编译）
-EXCLUDE_PATTERN='(^torch==|^torchvision==|^torchaudio==|^torchao==|^nvidia-|^git\+|.*@ git\+|^dbus-python|^PyGObject|^devscripts|^transformer_engine|^transformer_engine_cu12|^transformer_engine_torch|^flash-attn|^flash_attn|^flashinfer)'
+# nvidia-modelopt 不排除，megatron-bridge 依赖它
+EXCLUDE_PATTERN='(^torch==|^torchvision==|^torchaudio==|^torchao==|^nvidia-(?!modelopt)|^git\+|.*@ git\+|^dbus-python|^PyGObject|^devscripts|^transformer_engine|^transformer_engine_cu12|^transformer_engine_torch|^flash-attn|^flash_attn|^flashinfer)'
 
-grep -v -E "$EXCLUDE_PATTERN" "$REPO_DIR/requirements.txt" \
+grep -v -P "$EXCLUDE_PATTERN" "$REPO_DIR/requirements.txt" \
   > /tmp/openclaw-rl-filtered-requirements.txt
 
 echo "  → 安装常规依赖 (已排除 torch/nvidia/系统包/CUDA编译包)..."

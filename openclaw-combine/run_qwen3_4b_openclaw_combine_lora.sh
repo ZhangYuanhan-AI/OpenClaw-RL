@@ -40,11 +40,19 @@ REF_LOAD=${REF_LOAD:-${HF_CKPT}}
 SAVE_CKPT=${SAVE_CKPT:-${REPO_ROOT}/ckpt/qwen3-4b-openclaw-combine-lora}
 PRM_MODEL_PATH=${PRM_MODEL_PATH:-${HF_CKPT}}
 
-export SGLANG_API_KEY="${SGLANG_API_KEY}"
+# --- Model preparation ---
+# Set HF_CKPT to an existing model path to skip download: export HF_CKPT=/path/to/your/model
+if [ ! -d "${HF_CKPT}" ]; then
+    echo "Model not found at ${HF_CKPT}, downloading..."
+    huggingface-cli download Qwen/Qwen3-4B --local-dir "${HF_CKPT}"
+fi
+
+export SGLANG_API_KEY="${SGLANG_API_KEY:-}"
 export SERVED_MODEL_NAME="qwen3-4b"
 export HOST="0.0.0.0"
 export PORT="30000"
 export OPENCLAW_RECORD_ENABLED="${OPENCLAW_RECORD_ENABLED:-1}"  # 0=off, 1=on
+mkdir -p "${SCRIPT_DIR}/results"
 export OPENCLAW_RECORD_FILE="${SCRIPT_DIR}/results/qwen3_4b_lora_record.jsonl"
 export TP="${TP:-1}"
 export CONTEXT_LENGTH="32768"

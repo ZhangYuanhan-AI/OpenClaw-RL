@@ -32,18 +32,27 @@ export RAY_num_heartbeats_timeout=60
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 SLIME_ROOT="$(cd -- "${SCRIPT_DIR}/../slime" &>/dev/null && pwd)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." &>/dev/null && pwd)"
 source "${SLIME_ROOT}/scripts/models/qwen3-4B.sh"
 
-HF_CKPT=${HF_CKPT:-/data_storage/wyj/systems/huggingface/hub/Qwen3-4B-Thinking-2507}
+HF_CKPT=${HF_CKPT:-${REPO_ROOT}/models/Qwen3-4B}
 REF_LOAD=${REF_LOAD:-${HF_CKPT}}
-SAVE_CKPT=${SAVE_CKPT:-/data_storage/wyj/OpenClaw-RL/ckpt/qwen3-4b-openclaw-combine}
-PRM_MODEL_PATH=${PRM_MODEL_PATH:-/data_storage/wyj/systems/huggingface/hub/Qwen3-4B-Thinking-2507}
+SAVE_CKPT=${SAVE_CKPT:-${REPO_ROOT}/ckpt/qwen3-4b-openclaw-combine}
+PRM_MODEL_PATH=${PRM_MODEL_PATH:-${HF_CKPT}}
 
-export SGLANG_API_KEY="${SGLANG_API_KEY}"
+# --- Model preparation ---
+# Set HF_CKPT to an existing model path to skip download: export HF_CKPT=/path/to/your/model
+if [ ! -d "${HF_CKPT}" ]; then
+    echo "Model not found at ${HF_CKPT}, downloading..."
+    huggingface-cli download Qwen/Qwen3-4B --local-dir "${HF_CKPT}"
+fi
+
+export SGLANG_API_KEY="${SGLANG_API_KEY:-}"
 export SERVED_MODEL_NAME="qwen3-4b"
 export HOST="0.0.0.0"
 export PORT="30000"
 export OPENCLAW_RECORD_ENABLED="${OPENCLAW_RECORD_ENABLED:-1}"  # 0=off, 1=on
+mkdir -p "${SCRIPT_DIR}/results"
 export OPENCLAW_RECORD_FILE="${SCRIPT_DIR}/results/qwen3_4b_record.jsonl"
 export TP="2"
 export CONTEXT_LENGTH="32768"
@@ -176,7 +185,7 @@ ray start --head --node-ip-address "${MASTER_ADDR}" --num-gpus "${NUM_GPUS}" --d
 
 RUNTIME_ENV_JSON="{
   \"env_vars\": {
-    \"PYTHONPATH\": \"/data_storage/wyj/OpenClaw-RL/Megatron-LM/:${SCRIPT_DIR}:${SCRIPT_DIR}/../openclaw-opd:${SLIME_ROOT}\",
+    \"PYTHONPATH\": \"${REPO_ROOT}/Megatron-LM/:${SCRIPT_DIR}:${SCRIPT_DIR}/../openclaw-opd:${SLIME_ROOT}\",
     \"CUDA_DEVICE_MAX_CONNECTIONS\": \"1\",
     \"OPENCLAW_EVAL_MODE\": \"${OPENCLAW_EVAL_MODE}\",
     \"OPENCLAW_COMBINE_W_RL\": \"${OPENCLAW_COMBINE_W_RL}\",

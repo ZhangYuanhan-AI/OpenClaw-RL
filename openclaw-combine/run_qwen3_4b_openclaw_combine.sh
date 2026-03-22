@@ -70,7 +70,6 @@ CKPT_ARGS=(
    --ref-load "${REF_LOAD}"
    --save "${SAVE_CKPT}"
    --save-interval 100
-   --rotary-base 5000000
 )
 
 ROLLOUT_ARGS=(

@@ -47,10 +47,10 @@ if [ ! -d "${HF_CKPT}" ]; then
     huggingface-cli download Qwen/Qwen3-4B --local-dir "${HF_CKPT}"
 fi
 
-export SGLANG_API_KEY="${SGLANG_API_KEY:-}"
+export SGLANG_API_KEY="${SGLANG_API_KEY:-123456}"
 export SERVED_MODEL_NAME="qwen3-4b"
 export HOST="0.0.0.0"
-export PORT="30000"
+export PORT="8081"
 export OPENCLAW_RECORD_ENABLED="${OPENCLAW_RECORD_ENABLED:-1}"  # 0=off, 1=on
 mkdir -p "${SCRIPT_DIR}/results"
 export OPENCLAW_RECORD_FILE="${SCRIPT_DIR}/results/qwen3_4b_record.jsonl"

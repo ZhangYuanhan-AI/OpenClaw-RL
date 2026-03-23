@@ -691,6 +691,19 @@ class OpenClawOPDAPIServer:
         if not isinstance(messages, list) or not messages:
             raise HTTPException(status_code=400, detail="messages must be a non-empty list")
 
+        # Log the received messages for debugging
+        for i, msg in enumerate(messages):
+            role = msg.get("role", "?")
+            msg_content = msg.get("content") or ""
+            if isinstance(msg_content, list):
+                msg_content = " ".join(
+                    part.get("text", str(part)) for part in msg_content if isinstance(part, dict)
+                )
+            logger.info(
+                "[OpenClaw-OPD] [recv] session=%s msg[%d] role=%s content=%s",
+                session_id, i, role, msg_content[:500],
+            )
+
         tools = body.get("tools")
         forward_body = {k: v for k, v in body.items() if k not in _NON_STANDARD_BODY_KEYS}
         forward_body["stream"] = False
